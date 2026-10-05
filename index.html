@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pen</title>
+  </head>
+  <body>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>網頁作品集 | Portfolio Portal</title>
+  
+  <!-- 引入 Google 字型: 歐式古典字型 Cinzel & 繁體中文襯線體 Noto Serif TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       1. 全局重置與歐式主題變數 (CSS Variables)
+       ========================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-color: #0b1320;
+      --card-bg: rgba(22, 33, 56, 0.75);
+      --gold-primary: #d4af37;
+      --gold-light: #f3e5ab;
+      --gold-glow: rgba(212, 175, 55, 0.4);
+      --text-color: #e6e6e6;
+      --text-muted: #8c97a8;
+      --locked-bg: rgba(18, 25, 38, 0.6);
+      --locked-border: #2a384d;
+      --border-gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+    }
+
+    body {
+      font-family: 'Noto Serif TC', 'Cinzel', serif;
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(circle at 50% 20%, rgba(30, 48, 80, 0.5) 0%, transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(20, 30, 50, 0.4) 0%, transparent 50%);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    /* ==========================================
+       2. 主要容器與歐式金邊邊框
+       ========================================== */
+    .portfolio-container {
+      width: 100%;
+      max-width: 1000px;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 2px solid var(--gold-primary);
+      border-radius: 12px;
+      padding: 40px 30px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px var(--gold-glow);
+      position: relative;
+    }
+
+    /* 古典角落裝飾 */
+    .portfolio-container::before,
+    .portfolio-container::after {
+      content: '✦';
+      position: absolute;
+      color: var(--gold-primary);
+      font-size: 1.2rem;
+    }
+    .portfolio-container::before { top: 10px; left: 15px; }
+    .portfolio-container::after { bottom: 10px; right: 15px; }
+
+    /* ==========================================
+       3. 個人檔案個人資訊區 (Header / Profile)
+       ========================================== */
+    .profile-header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 18px auto;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--gold-primary);
+      box-shadow: 0 0 15px var(--gold-glow);
+    }
+
+    .avatar-frame {
+      position: absolute;
+      top: -8px; left: -8px; right: -8px; bottom: -8px;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: rotateFrame 20s linear infinite;
+    }
+
+    @keyframes rotateFrame {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .author-name {
+      font-family: 'Cinzel', 'Noto Serif TC', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    /* 遊戲闖關進度條 */
+    .quest-progress {
+      max-width: 300px;
+      margin: 15px auto 0 auto;
+      text-align: center;
+    }
+
+    .progress-text {
+      font-size: 0.8rem;
+      color: var(--gold-primary);
+      margin-bottom: 5px;
+      letter-spacing: 1px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .progress-bar-fill {
+      width: calc((2 / 16) * 100%);
+      height: 100%;
+      background: var(--border-gold);
+      box-shadow: 0 0 8px var(--gold-primary);
+    }
+
+    /* ==========================================
+       4. 16 個任務按鈕網格系統 (Grid System)
+       ========================================== */
+    .quest-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 25px;
+    }
+
+    .quest-card {
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100px;
+      padding: 15px;
+      border-radius: 8px;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      overflow: hidden;
+    }
+
+    /* --- 已解鎖按鈕樣式 --- */
+    .quest-card.unlocked {
+      background: linear-gradient(145deg, rgba(30, 45, 75, 0.8), rgba(15, 25, 45, 0.9));
+      border: 1px solid var(--gold-primary);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+    }
+
+    .quest-card.unlocked .quest-number {
+      font-size: 0.75rem;
+      color: var(--gold-primary);
+      font-weight: 600;
+    }
+
+    .quest-card.unlocked .quest-title {
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+
+    .quest-card.unlocked .status-tag {
+      font-size: 0.7rem;
+      color: var(--gold-light);
+      align-self: flex-end;
+    }
+
+    /* 酷炫懸停動畫 (Hover Effect) */
+    .quest-card.unlocked:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+      border-color: var(--gold-light);
+    }
+
+    /* 掃光效果 (Shimmer animation) */
+    .quest-card.unlocked::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent 45%,
+        rgba(255, 255, 255, 0.15) 50%,
+        transparent 55%
+      );
+      transform: rotate(30deg) translateY(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .quest-card.unlocked:hover::before {
+      transform: rotate(30deg) translateY(100%);
+    }
+
+    /* --- 未解鎖按鈕樣式 --- */
+    .quest-card.locked {
+      background: var(--locked-bg);
+      border: 1px solid var(--locked-border);
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    .quest-card.locked .quest-number {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .quest-card.locked .quest-title {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 5px;
+    }
+
+    .quest-card.locked .lock-icon {
+      font-size: 1.1rem;
+      align-self: flex-end;
+      filter: grayscale(80%);
+    }
+
+    .quest-card.locked:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      opacity: 0.8;
+    }
+
+    /* ==========================================
+       5. 響應式佈局 (Responsive Design)
+       ========================================== */
+    /* 平板裝置 */
+    @media (max-width: 850px) {
+      .quest-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .quest-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      .portfolio-container {
+        padding: 25px 15px;
+      }
+      .author-name {
+        font-size: 1.6rem;
+      }
+      .quest-card {
+        height: 90px;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="portfolio-container">
+    <!-- 個人資訊 Header -->
+    <header class="profile-header">
+      <div class="avatar-wrapper">
+        <!-- 預設的大頭貼圖片 (假圖) -->
+        <img class="avatar-img" src="https://i.postimg.cc/vBs8HkmG/Screenshot-2026-09-14-15-42-16-25-965bbf4d18d205f782c6b8409c5773a4.jpg" alt="大頭貼">
+        <div class="avatar-frame"></div>
+      </div>
+      <h1 class="author-name">余梓豪</h1>
+      <p class="subtitle">網頁程式設計 學習作品集</p>
+
+      <!-- 闖關進度條 -->
+      <div class="quest-progress">
+        <div class="progress-text">QUEST PROGRESS: 2 / 16</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 16 個按鈕區域 -->
+    <main class="quest-grid">
+      <!-- 按鈕 1 (已解鎖) -->
+      <a href="w1/index.html" class="quest-card unlocked">
+        <span class="quest-number">WEEK 01</span>
+        <span class="quest-title">Week1-數位名片</span>
+        <span class="status-tag">✦ 已解鎖</span>
+      </a>
+
+      <!-- 按鈕 2 (已解鎖) -->
+      <a href="w2/index.html" class="quest-card unlocked">
+        <span class="quest-number">WEEK 02</span>
+        <span class="quest-title">Week 2-今天吃甚麼?</span>
+        <span class="status-tag">✦ 已解鎖</span>
+      </a>
+
+      <!-- 按鈕 3 ~ 16 (未解鎖) -->
+      <div class="quest-card locked"><span class="quest-number">WEEK 03</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 04</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 05</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 06</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 07</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 08</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 09</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 10</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 11</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 12</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 13</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 14</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 15</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+      <div class="quest-card locked"><span class="quest-number">WEEK 16</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
+    </main>
+  </div>
+
+</body>
+</html>
