@@ -1,366 +1,399 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>網頁作品集 | Portfolio Portal</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Friends' Messages | 動態留言牆</title>
   
-  <!-- 引入 Google 字型: 歐式古典字型 Cinzel & 繁體中文襯線體 Noto Serif TC -->
+  <!-- 導入歐美視覺風格常用的高級字型 (Playfair Display 襯線體 + Montserrat 無襯線體) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:ital,wght@0,600;0,800;1,400&display=swap" rel="stylesheet">
 
   <style>
-    /* ==========================================
-       1. 全局重置與歐式主題變數 (CSS Variables)
-       ========================================== */
+    /* ==========================================================================
+       1. 全局變數定義 (方便你後續修改顏色與風格)
+       ========================================================================== */
+    :root {
+      /* 【顏色控制區】 */
+      --bg-color: #0d0f12;           /* 主背景色：深邃暗黑 */
+      --card-bg: #161a20;            /* 卡片背景色：暗灰 */
+      --text-main: #f3f4f6;          /* 主文字顏色：冷白 */
+      --text-muted: #9ca3af;         /* 次要文字/時間顏色：灰 */
+      --accent-gold: #d4af37;        /* 亮點配色：歐美香檳金 */
+      
+      /* 【輪播亮起特效控制區】 */
+      --highlight-glow: rgba(212, 175, 55, 0.4); /* 高亮時的發光顏色 (金黃色半透明) */
+      --highlight-border: #d4af37;              /* 高亮時的邊框顏色 */
+      --dim-opacity: 0.35;                      /* 未選中卡片的透明度 (0 ~ 1) */
+      --dim-blur: 2px;                          /* 未選中卡片的模糊程度 */
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    :root {
-      --bg-color: #0b1320;
-      --card-bg: rgba(22, 33, 56, 0.75);
-      --gold-primary: #d4af37;
-      --gold-light: #f3e5ab;
-      --gold-glow: rgba(212, 175, 55, 0.4);
-      --text-color: #e6e6e6;
-      --text-muted: #8c97a8;
-      --locked-bg: rgba(18, 25, 38, 0.6);
-      --locked-border: #2a384d;
-      --border-gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-    }
-
     body {
-      font-family: 'Noto Serif TC', 'Cinzel', serif;
       background-color: var(--bg-color);
-      background-image: 
-        radial-gradient(circle at 50% 20%, rgba(30, 48, 80, 0.5) 0%, transparent 60%),
-        radial-gradient(circle at 80% 80%, rgba(20, 30, 50, 0.4) 0%, transparent 50%);
-      color: var(--text-color);
+      color: var(--text-main);
+      font-family: 'Montserrat', sans-serif;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 40px 20px;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
     }
 
-    /* ==========================================
-       2. 主要容器與歐式金邊邊框
-       ========================================== */
-    .portfolio-container {
-      width: 100%;
-      max-width: 1000px;
-      background: var(--card-bg);
-      backdrop-filter: blur(10px);
-      border: 2px solid var(--gold-primary);
-      border-radius: 12px;
-      padding: 40px 30px;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px var(--gold-glow);
-      position: relative;
-    }
-
-    /* 古典角落裝飾 */
-    .portfolio-container::before,
-    .portfolio-container::after {
-      content: '✦';
-      position: absolute;
-      color: var(--gold-primary);
-      font-size: 1.2rem;
-    }
-    .portfolio-container::before { top: 10px; left: 15px; }
-    .portfolio-container::after { bottom: 10px; right: 15px; }
-
-    /* ==========================================
-       3. 個人檔案個人資訊區 (Header / Profile)
-       ========================================== */
-    .profile-header {
+    /* ==========================================================================
+       2. 頁首與標題視覺 (歐美雜誌風格 Editorial Style)
+       ========================================================================== */
+    header {
       text-align: center;
-      margin-bottom: 35px;
+      margin-bottom: 3rem;
+      padding: 1rem 0;
     }
 
-    .avatar-wrapper {
-      position: relative;
-      width: 120px;
-      height: 120px;
-      margin: 0 auto 18px auto;
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #ffffff 0%, var(--accent-gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
     }
 
-    .avatar-img {
-      width: 100%;
-      height: 100%;
+    header p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ==========================================================================
+       3. 載入中酷炫動畫 (Loading Spinner)
+       ========================================================================== */
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 0;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
       border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--gold-primary);
-      box-shadow: 0 0 15px var(--gold-glow);
+      border-top-color: var(--accent-gold);
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 1.5rem;
     }
 
-    .avatar-frame {
-      position: absolute;
-      top: -8px; left: -8px; right: -8px; bottom: -8px;
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      border-radius: 50%;
-      pointer-events: none;
-      animation: rotateFrame 20s linear infinite;
+    #loading p {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      letter-spacing: 2px;
+      color: var(--accent-gold);
+      font-size: 1.1rem;
     }
 
-    @keyframes rotateFrame {
-      from { transform: rotate(0deg); }
+    @keyframes spin {
       to { transform: rotate(360deg); }
     }
 
-    .author-name {
-      font-family: 'Cinzel', 'Noto Serif TC', serif;
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--gold-light);
-      letter-spacing: 2px;
-      margin-bottom: 6px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    /* ==========================================================================
+       4. 瀑布流排版 (Masonry Layout via CSS Columns)
+       ========================================================================== */
+    .masonry-grid {
+      /* RWD 多欄位瀑布流設定 */
+      column-count: 3;        /* 桌機預設 3 欄 */
+      column-gap: 1.5rem;     /* 欄位間距 */
+      display: none;          /* 載入完成前先隱藏 */
     }
 
-    .subtitle {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      letter-spacing: 1px;
+    @media (max-width: 900px) {
+      .masonry-grid { column-count: 2; } /* 平板 2 欄 */
     }
-
-    /* 遊戲闖關進度條 */
-    .quest-progress {
-      max-width: 300px;
-      margin: 15px auto 0 auto;
-      text-align: center;
-    }
-
-    .progress-text {
-      font-size: 0.8rem;
-      color: var(--gold-primary);
-      margin-bottom: 5px;
-      letter-spacing: 1px;
-    }
-
-    .progress-bar-bg {
-      width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      overflow: hidden;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-    }
-
-    .progress-bar-fill {
-      /* 更新為 4/16 進度 */
-      width: calc((4 / 16) * 100%);
-      height: 100%;
-      background: var(--border-gold);
-      box-shadow: 0 0 8px var(--gold-primary);
-      transition: width 0.5s ease;
-    }
-
-    /* ==========================================
-       4. 16 個任務按鈕網格系統 (Grid System)
-       ========================================== */
-    .quest-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
-      margin-top: 25px;
-    }
-
-    .quest-card {
-      text-decoration: none;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      height: 100px;
-      padding: 15px;
-      border-radius: 8px;
-      position: relative;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      overflow: hidden;
-    }
-
-    /* --- 已解鎖按鈕樣式 --- */
-    .quest-card.unlocked {
-      background: linear-gradient(145deg, rgba(30, 45, 75, 0.8), rgba(15, 25, 45, 0.9));
-      border: 1px solid var(--gold-primary);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      cursor: pointer;
-    }
-
-    .quest-card.unlocked .quest-number {
-      font-size: 0.75rem;
-      color: var(--gold-primary);
-      font-weight: 600;
-    }
-
-    .quest-card.unlocked .quest-title {
-      color: #ffffff;
-      font-size: 1rem;
-      font-weight: 600;
-      margin-top: 5px;
-    }
-
-    .quest-card.unlocked .status-tag {
-      font-size: 0.7rem;
-      color: var(--gold-light);
-      align-self: flex-end;
-    }
-
-    /* 酷炫懸停動畫 (Hover Effect) */
-    .quest-card.unlocked:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
-      border-color: var(--gold-light);
-    }
-
-    /* 掃光效果 (Shimmer animation) */
-    .quest-card.unlocked::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(
-        45deg,
-        transparent 45%,
-        rgba(255, 255, 255, 0.15) 50%,
-        transparent 55%
-      );
-      transform: rotate(30deg) translateY(-100%);
-      transition: transform 0.6s ease;
-    }
-
-    .quest-card.unlocked:hover::before {
-      transform: rotate(30deg) translateY(100%);
-    }
-
-    /* --- 未解鎖按鈕樣式 --- */
-    .quest-card.locked {
-      background: var(--locked-bg);
-      border: 1px solid var(--locked-border);
-      cursor: not-allowed;
-      opacity: 0.65;
-    }
-
-    .quest-card.locked .quest-number {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .quest-card.locked .quest-title {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      margin-top: 5px;
-    }
-
-    .quest-card.locked .lock-icon {
-      font-size: 1.1rem;
-      align-self: flex-end;
-      filter: grayscale(80%);
-    }
-
-    .quest-card.locked:hover {
-      border-color: rgba(255, 255, 255, 0.2);
-      opacity: 0.8;
-    }
-
-    /* ==========================================
-       5. 響應式佈局 (Responsive Design)
-       ========================================== */
-    @media (max-width: 850px) {
-      .quest-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
     @media (max-width: 600px) {
-      .quest-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-      .portfolio-container {
-        padding: 25px 15px;
-      }
-      .author-name {
-        font-size: 1.6rem;
-      }
-      .quest-card {
-        height: 90px;
-        padding: 12px;
-      }
+      .masonry-grid { column-count: 1; } /* 手機 1 欄 */
+    }
+
+    /* ==========================================================================
+       5. 留言卡片基礎與高亮特效樣式
+       ========================================================================== */
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+      break-inside: avoid; /* 關鍵：防止卡片在瀑布流跨欄斷裂 */
+      position: relative;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      
+      /* 動態平滑轉場效果 (對放大、發光、透明度變化起作用) */
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transform-origin: center center;
+    }
+
+    /* 引號裝飾圖案 */
+    .card::before {
+      content: '“';
+      font-family: 'Playfair Display', serif;
+      font-size: 4rem;
+      position: absolute;
+      top: -10px;
+      left: 15px;
+      color: rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.8rem;
+    }
+
+    .card-author {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent-gold);
+      letter-spacing: 0.5px;
+    }
+
+    .card-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .card-content {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: var(--text-main);
+      white-space: pre-wrap; /* 保持原本留言的換行格式 */
+      word-break: break-word;
+    }
+
+    /* ---【重點特效】輪播動態狀態 --- */
+
+    /* A. 被選中的卡片：放大、亮起、發光 */
+    .card.highlight {
+      transform: scale(1.05);
+      border-color: var(--highlight-border);
+      box-shadow: 0 0 25px var(--highlight-glow), 0 15px 30px rgba(0,0,0,0.5);
+      z-index: 10; /* 確保高亮的卡片壓在最上層 */
+      opacity: 1 !important;
+      filter: blur(0px) !important;
+    }
+
+    /* B. 未被選中的卡片 (當有其他卡片被高亮時套用) */
+    .masonry-grid.is-highlighting .card:not(.highlight) {
+      opacity: var(--dim-opacity);
+      filter: blur(var(--dim-blur));
+      transform: scale(0.98);
     }
   </style>
 </head>
 <body>
 
-  <div class="portfolio-container">
-    <!-- 個人資訊 Header -->
-    <header class="profile-header">
-      <div class="avatar-wrapper">
-        <img class="avatar-img" src="https://i.postimg.cc/vBs8HkmG/Screenshot-2026-09-14-15-42-16-25-965bbf4d18d205f782c6b8409c5773a4.jpg" alt="大頭貼">
-        <div class="avatar-frame"></div>
-      </div>
-      <h1 class="author-name">余梓豪</h1>
-      <p class="subtitle">網頁程式設計 學習作品集</p>
-
-      <!-- 闖關進度條 (更新為 4/16) -->
-      <div class="quest-progress">
-        <div class="progress-text">QUEST PROGRESS: 4 / 16</div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill"></div>
-        </div>
-      </div>
+  <div class="container">
+    <header>
+      <h1>Friends' Words</h1>
+      <p>— Dynamic Wall of Memories —</p>
     </header>
 
-    <!-- 16 個按鈕區域 -->
-    <main class="quest-grid">
-      <!-- 按鈕 1 (已解鎖) -->
-      <a href="w1/index.html" class="quest-card unlocked">
-        <span class="quest-number">WEEK 01</span>
-        <span class="quest-title">Week1-數位名片</span>
-        <span class="status-tag">✦ 已解鎖</span>
-      </a>
+    <!-- 載入中酷炫動畫 -->
+    <div id="loading">
+      <div class="spinner"></div>
+      <p>載入留言中...</p>
+    </div>
 
-      <!-- 按鈕 2 (已解鎖) -->
-      <a href="w2/index.html" class="quest-card unlocked">
-        <span class="quest-number">WEEK 02</span>
-        <span class="quest-title">Week 2-今天吃甚麼?</span>
-        <span class="status-tag">✦ 已解鎖</span>
-      </a>
-
-      <!-- 按鈕 3 (已解鎖) -->
-      <a href="w3/index.html" class="quest-card unlocked">
-        <span class="quest-number">WEEK 03</span>
-        <span class="quest-title">Week 3-動態留言板</span>
-        <span class="status-tag">✦ 已解鎖</span>
-      </a>
-
-      <!-- 按鈕 4 (已解鎖 - 新增) -->
-      <a href="w4/index.html" class="quest-card unlocked">
-        <span class="quest-number">WEEK 04</span>
-        <span class="quest-title">Week 4-作品名稱</span>
-        <span class="status-tag">✦ 已解鎖</span>
-      </a>
-
-      <!-- 按鈕 5 ~ 16 (未解鎖) -->
-      <div class="quest-card locked"><span class="quest-number">WEEK 05</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
-      <div class="quest-card locked"><span class="quest-number">WEEK 06</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
-      <div class="quest-card locked"><span class="quest-number">WEEK 07</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
-      <div class="quest-card locked"><span class="quest-number">WEEK 08</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
-      <div class="quest-card locked"><span class="quest-number">WEEK 09</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
-      <div class="quest-card locked"><span class="quest-number">WEEK 10</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
-      <div class="quest-card locked"><span class="quest-number">WEEK 11</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
-      <div class="quest-card locked"><span class="quest-number">WEEK 12</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
-      <div class="quest-card locked"><span class="quest-number">WEEK 13</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
-      <div class="quest-card locked"><span class="quest-number">WEEK 14</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
-      <div class="quest-card locked"><span class="quest-number">WEEK 15</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
-      <div class="quest-card locked"><span class="quest-number">WEEK 16</span><span class="quest-title">未解鎖任務</span><span class="lock-icon">🔒</span></div>
-    </main>
+    <!-- 留言瀑布流區域 -->
+    <div id="masonry" class="masonry-grid"></div>
   </div>
 
+  <script>
+    /* ==========================================================================
+       6. 參數設定區 (方便你控制輪播秒數與資料來源)
+       ========================================================================== */
+    const CONFIG = {
+      // CSV 資料來源網址
+      csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNqce7Hp5JM0bG8mcLq_bw2guUo7Kc1HgLdSloLMQ6sfpc6lkNldbM2t6i_r7Kf3Tt1WXy1RPJpoiC/pub?output=csv',
+      
+      // 【輪播秒數控制】單位為毫秒 (3000ms = 3 秒)
+      rotateInterval: 3000 
+    };
+
+    let messages = [];
+    let currentIndex = -1;
+    let highlightTimer = null;
+
+    /* ==========================================================================
+       7. CSV 解析器 (妥善處理留言內部包含逗號及雙引號換行的情況)
+       ========================================================================== */
+    function parseCSV(text) {
+      const lines = [];
+      let row = [];
+      let entry = '';
+      let insideQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"') {
+          if (insideQuotes && nextChar === '"') {
+            entry += '"'; // 處理雙重引號轉義
+            i++;
+          } else {
+            insideQuotes = !insideQuotes; // 切換引號狀態
+          }
+        } else if (char === ',' && !insideQuotes) {
+          row.push(entry.trim());
+          entry = '';
+        } else if ((char === '\r' || char === '\n') && !insideQuotes) {
+          if (char === '\r' && nextChar === '\n') { i++; }
+          row.push(entry.trim());
+          if (row.some(field => field.length > 0)) {
+            lines.push(row);
+          }
+          row = [];
+          entry = '';
+        } else {
+          entry += char;
+        }
+      }
+      if (entry || row.length > 0) {
+        row.push(entry.trim());
+        lines.push(row);
+      }
+      return lines;
+    }
+
+    /* ==========================================================================
+       8. 繪製 HTML 卡片牆
+       ========================================================================== */
+    function renderCards(data) {
+      const container = document.getElementById('masonry');
+      container.innerHTML = '';
+
+      // 跳過 CSV 第一行 (標頭檔: 時間戳記, 名字, 悄悄話)
+      const rows = data.slice(1);
+
+      rows.forEach((row, index) => {
+        // 欄位拆解：欄位 0 為時間戳記、欄位 1 為名字、欄位 2 為留言內容
+        const rawTime = row[0] || '';
+        const name = row[1] || 'Anonymous';
+        const message = row[2] || '';
+
+        if (!message) return; // 無內容則忽略
+
+        // 簡單格式化時間顯示 (只保留日期)
+        const timeFormatted = rawTime.split(' ')[0] || rawTime;
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.setAttribute('data-index', index);
+
+        card.innerHTML = `
+          <div class="card-header">
+            <span class="card-author">${escapeHtml(name)}</span>
+            <span class="card-time">${escapeHtml(timeFormatted)}</span>
+          </div>
+          <div class="card-content">${escapeHtml(message)}</div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // 防止 XSS 攻擊的字串安全轉換
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    /* ==========================================================================
+       9. 隨時間輪播高亮特效控制 (Highlight Carousel)
+       ========================================================================== */
+    function startHighlightCarousel() {
+      const cards = document.querySelectorAll('.card');
+      const grid = document.getElementById('masonry');
+
+      if (cards.length === 0) return;
+
+      // 標記網頁處於輪播狀態，讓 CSS 生效未選中的變暗/模糊效果
+      grid.classList.add('is-highlighting');
+
+      highlightTimer = setInterval(() => {
+        // 1. 移除上一張卡片的高亮
+        if (currentIndex >= 0 && cards[currentIndex]) {
+          cards[currentIndex].classList.remove('highlight');
+        }
+
+        // 2. 計算下一個要高亮的索引 (循環播放)
+        currentIndex = (currentIndex + 1) % cards.length;
+
+        // 3. 賦予當前卡片高亮 Class
+        const currentCard = cards[currentIndex];
+        currentCard.classList.add('highlight');
+
+        // 4. (可選) 視窗平滑滾動至該卡片位置
+        currentCard.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
+        });
+
+      }, CONFIG.rotateInterval); // 每隔指定秒數切換一次
+    }
+
+    /* ==========================================================================
+       10. 初始化與資料讀取 (Fetch Data)
+       ========================================================================== */
+    async function init() {
+      const loadingEl = document.getElementById('loading');
+      const masonryEl = document.getElementById('masonry');
+
+      try {
+        // 從 Google 試算表獲取 CSV
+        const response = await fetch(CONFIG.csvUrl);
+        if (!response.ok) throw new Error('網路回應不成功');
+        
+        const csvText = await response.text();
+        const parsedData = parseCSV(csvText);
+
+        // 隱藏 Loading，顯示留言牆
+        loadingEl.style.display = 'none';
+        masonryEl.style.display = 'block';
+
+        // 生成卡片並啟動輪播特效
+        renderCards(parsedData);
+        startHighlightCarousel();
+
+      } catch (error) {
+        console.error('讀取 CSV 失敗:', error);
+        loadingEl.innerHTML = `<p style="color: #ef4444;">無法載入留言，請確認網路連線或網址設定。</p>`;
+      }
+    }
+
+    // 頁面載入後自動執行
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
 </html>
