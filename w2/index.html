@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>今天吃什麼？隨機抽籤機</title>
+  <!-- Google 字體 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+  
+  <!-- ==================== CSS 樣式區 ==================== -->
+  <style>
+    /* 活潑可愛黃/橘色系配色定義 */
+    :root {
+      --bg-yellow: #FFF9E6;
+      --card-bg: #FFFFFF;
+      --primary-orange: #FF7E36;
+      --primary-yellow: #FFC72C;
+      --text-dark: #4A3E3D;
+      --shadow-color: rgba(255, 126, 54, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-yellow);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: 20px;
+    }
+
+    /* 可愛背景視覺 */
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(50px);
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    .bg-1 {
+      width: 320px;
+      height: 320px;
+      background-color: var(--primary-yellow);
+      top: -60px;
+      left: -60px;
+    }
+
+    .bg-2 {
+      width: 280px;
+      height: 280px;
+      background-color: var(--primary-orange);
+      bottom: -60px;
+      right: -60px;
+    }
+
+    /* 主卡片樣式 */
+    .card {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 420px;
+      padding: 36px 28px;
+      border-radius: 32px;
+      box-shadow: 0 16px 32px var(--shadow-color);
+      border: 4px solid #FFE4A0;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tag {
+      display: inline-block;
+      background-color: #FFF3D1;
+      color: var(--primary-orange);
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    /* 生動彈跳動畫的大標題 */
+    h1 {
+      font-size: 2.2rem;
+      color: var(--primary-orange);
+      margin-bottom: 24px;
+      min-height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 彈跳 Keyframe 動畫 */
+    .bounce {
+      animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { transform: scale(1.15); }
+      70% { transform: scale(0.9); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* 食物照片顯示區 */
+    .photo-box {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 4px solid #FFF3D1;
+      margin-bottom: 24px;
+    }
+
+    .photo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-mask {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      backdrop-filter: blur(2px);
+      transition: opacity 0.3s ease;
+    }
+
+    .photo-mask.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* 按鈕樣式 */
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .main-btn {
+      background-color: var(--primary-yellow);
+      color: var(--text-dark);
+      font-size: 1.3rem;
+      font-weight: 900;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #E5B438;
+      transition: all 0.1s ease;
+    }
+
+    .main-btn:hover {
+      background-color: #FFE082;
+      transform: translateY(-2px);
+    }
+
+    .main-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #E5B438;
+    }
+
+    .map-btn {
+      display: inline-block;
+      background-color: var(--primary-orange);
+      color: white;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 14px 24px;
+      border-radius: 50px;
+      box-shadow: 0 5px 0 #D9621E;
+      transition: all 0.1s ease;
+    }
+
+    .map-btn:hover {
+      background-color: #FF9356;
+    }
+
+    .map-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #D9621E;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 背景裝飾圓點 -->
+  <div class="bg-circle bg-1"></div>
+  <div class="bg-circle bg-2"></div>
+
+  <!-- 主要內容卡片 -->
+  <main class="card">
+    <div class="tag">🍱 解決選擇困難症 🍔</div>
+    
+    <!-- 1. 大標題 -->
+    <h1 id="main-title">今天吃什麼？</h1>
+
+    <!-- 食物照片顯示區 -->
+    <div class="photo-box">
+      <img id="food-img" src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80" alt="預設美食圖片">
+      <div id="photo-mask" class="photo-mask">❓ 準備好抽籤了嗎？</div>
+    </div>
+
+    <!-- 按鈕區域 -->
+    <div class="btn-group">
+      <!-- 2. 大按鈕 -->
+      <button id="draw-btn" class="main-btn">🎲 點我抽籤</button>
+      
+      <!-- 3. 馬上出發按鈕 (預設隱藏) -->
+      <a id="go-map-btn" href="#" target="_blank" rel="noopener noreferrer" class="map-btn hidden">🚀 馬上出發！搜尋附近</a>
+    </div>
+  </main>
+
+  <!-- ==================== JavaScript 腳本區 ==================== -->
+  <script>
+    // 包裝在 DOMContentLoaded 內，確保 HTML DOM 載入完全才執行
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // 1. 定義 5 種指定美食與網路圖片
+      const foodOptions = [
+        {
+          name: '築間左營店',
+          image: 'https://i.postimg.cc/2S60K1V4/IMG20260623192835.jpg'
+        },
+        {
+          name: '卡布 義式料理',
+          image: 'https://i.postimg.cc/59svknvD/IMG20260908121707.jpg'
+        },
+        {
+          name: '呷雞湯',
+          image: 'https://i.postimg.cc/T30ppP9r/IMG20260711124306.jpg'
+        },
+        {
+          name: '饗麻饗辣 明誠旗艦店',
+          image: 'https://i.postimg.cc/1zRMqf12/IMG20260920143317.jpg'
+        },
+        {
+          name: '樹德科技大學 小吃 花枝丸',
+          image: 'https://i.postimg.cc/7h1T9ngn/IMG20260916122217.jpg'
+        }
+      ];
+
+      // 2. 取得 DOM 元素
+      const mainTitle = document.getElementById('main-title');
+      const drawBtn = document.getElementById('draw-btn');
+      const goMapBtn = document.getElementById('go-map-btn');
+      const foodImg = document.getElementById('food-img');
+      const photoMask = document.getElementById('photo-mask');
+
+      let isRunning = false;
+
+      // 3. 抽籤按鈕點擊事件
+      drawBtn.addEventListener('click', () => {
+        if (isRunning) return;
+        isRunning = true;
+
+        // 顯示遮罩提示
+        photoMask.classList.remove('hidden');
+        photoMask.textContent = '🎲 正在選題中...';
+
+        let count = 0;
+        const totalRolls = 15; // 滾動跳動 15 次
+
+        // 隨機跳動滾動效果
+        const timer = setInterval(() => {
+          const randomIndex = Math.floor(Math.random() * foodOptions.length);
+          mainTitle.textContent = foodOptions[randomIndex].name;
+          count++;
+
+          if (count >= totalRolls) {
+            clearInterval(timer);
+            
+            // 決定最終結果
+            const finalChoice = foodOptions[Math.floor(Math.random() * foodOptions.length)];
+            
+            // 替換標題並套用彈跳動畫
+            mainTitle.textContent = `🎉 今天就吃：${finalChoice.name}！`;
+            mainTitle.classList.remove('bounce');
+            void mainTitle.offsetWidth; // 重繪動畫 (Reflow)
+            mainTitle.classList.add('bounce');
+
+            // 替換指定的網路照片與隱藏遮罩
+            foodImg.src = finalChoice.image;
+            photoMask.classList.add('hidden');
+
+            // 設置 Google 地圖導航連結
+            const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(finalChoice.name)}`;
+            goMapBtn.href = googleMapUrl;
+            goMapBtn.classList.remove('hidden');
+
+            isRunning = false;
+          }
+        }, 80);
+      });
+
+    });
+  </script>
+</body>
+</html>
