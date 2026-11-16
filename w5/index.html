@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>雲端心電感應 - 古風默契考驗</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bamboo: '#4A6B5D',      // 竹青
+            tea: '#8C6D46',         // 茶褐
+            ink: '#2B2B2B',         // 墨黑
+            rice: '#F9F6F0',        // 米白/宣紙
+            clay: '#C28D75',        // 朱紅/陶土
+            amberLight: '#E8DFD0',  // 淺香赭
+          },
+          fontFamily: {
+            ancient: ['"Kaiti SC"', '"STKaiti"', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* 3D Flip Card Effect */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .transform-style-3d {
+      transform-style: preserve-3d;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+    
+    /* Smooth card flip transition */
+    .card-inner {
+      transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="bg-rice text-ink font-ancient min-h-screen flex flex-col justify-between selection:bg-clay selection:text-rice">
+
+  <!-- Header Section -->
+  <header class="p-6 text-center border-b border-tea/20 bg-amberLight/30 backdrop-blur-sm relative">
+    <h1 class="text-3xl sm:text-4xl font-bold tracking-widest text-tea">雲端心電感應</h1>
+    <p class="text-sm sm:text-base text-bamboo mt-1 italic">「清茶一盞，意合心同」</p>
+    
+    <!-- Hidden Host Toggle Trigger (Top right decorative element) -->
+    <button onclick="toggleHostPanel()" title="隱藏房主控制台" class="absolute top-4 right-4 text-xs opacity-30 hover:opacity-100 transition-opacity p-2 rounded border border-tea/30">
+      ⛩️ <span id="hostStatusText" class="hidden sm:inline">房主</span>
+    </button>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-4xl w-full mx-auto p-4 sm:p-6 flex-grow flex flex-col justify-center">
+
+    <!-- View 1: Login / Room Selection -->
+    <div id="loginView" class="bg-amberLight/40 p-6 sm:p-10 rounded-2xl border border-tea/30 shadow-lg text-center space-y-6">
+      <h2 class="text-2xl font-semibold text-tea">進入陣營</h2>
+      
+      <div class="space-y-4 max-w-xs mx-auto text-left">
+        <div>
+          <label class="block text-sm mb-1 text-tea font-bold">俠士稱呼 (玩家名稱)</label>
+          <input type="text" id="playerNameInput" placeholder="請輸入您的大名" class="w-full px-4 py-2 bg-rice border border-tea/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-bamboo">
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1 text-tea font-bold">房間代碼</label>
+          <input type="text" id="roomIdInput" placeholder="例：8888 或點擊下方創房" class="w-full px-4 py-2 bg-rice border border-tea/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-bamboo">
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row justify-center gap-4 pt-2">
+        <button onclick="joinGame()" class="px-6 py-2.5 bg-bamboo text-rice font-medium rounded-lg shadow hover:bg-bamboo/90 transition">
+          加入房間
+        </button>
+        <button onclick="createRandomRoom()" class="px-6 py-2.5 bg-tea text-rice font-medium rounded-lg shadow hover:bg-tea/90 transition">
+          隨機開房
+        </button>
+      </div>
+    </div>
+
+    <!-- View 2: Game Board -->
+    <div id="gameView" class="hidden space-y-6">
+      
+      <!-- Top Info Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-2 bg-amberLight/40 p-4 rounded-xl border border-tea/20">
+        <div>
+          <span class="text-sm text-tea">當前房號：</span>
+          <span id="currentRoomDisplay" class="font-bold text-bamboo text-lg">---</span>
+        </div>
+        <div>
+          <span class="text-sm text-tea">玩家名稱：</span>
+          <span id="currentPlayerDisplay" class="font-bold text-ink">---</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span id="gameStatusBadge" class="px-3 py-1 text-xs rounded-full bg-tea/20 text-tea">對局載入中...</span>
+          <button onclick="leaveRoom()" class="text-xs text-clay underline hover:text-clay/80">離開</button>
+        </div>
+      </div>
+
+      <!-- Question Display Card -->
+      <div class="bg-amberLight/60 p-6 rounded-2xl border border-tea/40 shadow-md text-center">
+        <h3 class="text-sm text-bamboo font-bold tracking-wider mb-2">【 本輪題目 】</h3>
+        <p id="questionDisplay" class="text-xl sm:text-2xl font-bold text-ink italic">等待房主出題中...</p>
+      </div>
+
+      <!-- Hidden Host Controller Panel -->
+      <div id="hostPanel" class="hidden bg-clay/10 p-5 rounded-2xl border border-clay/40 space-y-4">
+        <div class="flex items-center justify-between border-b border-clay/20 pb-2">
+          <h4 class="font-bold text-clay">⛩️ 房主專用控制台</h4>
+          <span class="text-xs text-clay/70">（全網頁同步控制）</span>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input type="text" id="hostQuestionInput" placeholder="請在此輸入題目..." class="flex-grow px-4 py-2 bg-rice border border-clay/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-clay">
+          <button onclick="hostSetQuestion()" class="px-5 py-2 bg-clay text-rice font-medium rounded-lg hover:bg-clay/90 transition shadow">
+            發布題目
+          </button>
+        </div>
+
+        <div class="flex flex-wrap gap-3 pt-1">
+          <button onclick="hostRevealCards()" class="px-5 py-2 bg-bamboo text-rice font-medium rounded-lg hover:bg-bamboo/90 transition shadow">
+            🎴 開牌 (同步翻牌)
+          </button>
+          <button onclick="hostResetGame()" class="px-5 py-2 bg-tea/80 text-rice font-medium rounded-lg hover:bg-tea transition shadow">
+            🔄 重置對局
+          </button>
+        </div>
+      </div>
+
+      <!-- Player Input Section (Active during 'playing' state) -->
+      <div id="playerInputSection" class="bg-rice p-5 rounded-xl border border-tea/30 shadow-sm space-y-3">
+        <label class="block text-sm text-tea font-bold">請輸入您的默契解答：</label>
+        <div class="flex gap-3">
+          <input type="text" id="playerAnswerInput" placeholder="輸入答案..." class="flex-grow px-4 py-2 bg-amberLight/20 border border-tea/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-bamboo">
+          <button onclick="submitAnswer()" class="px-6 py-2 bg-bamboo text-rice font-medium rounded-lg hover:bg-bamboo/90 transition shadow">
+            送出
+          </button>
+        </div>
+        <p id="submitStatusText" class="text-xs text-bamboo italic hidden">✓ 答案已成功傳送</p>
+      </div>
+
+      <!-- Cards Grid Section (3D CSS Flip Effect) -->
+      <div class="space-y-3">
+        <h4 class="text-lg font-bold text-tea border-b border-tea/20 pb-1">眾人作答：</h4>
+        <div id="cardsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <!-- Dynamic 3D Cards Inserted Here -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="p-4 text-center text-xs text-tea/60 border-t border-tea/10">
+    雲端心電感應 &copy; 默契遊戲 
+  </footer>
+
+  <!-- App Script Logic -->
+  <script>
+    // System Constants[cite: 1, 2]
+    const SHEET_NAME = 'TelepathyData';
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz3KMoLWZsYuSttXahmFF2Y-QBOqRCBzIY1MA8FuZwf3eiAtKFAeESL-UGe8LvDlFtYOw/exec";
+
+    // App State
+    let currentRoom = "";
+    let currentPlayer = "";
+    let isHost = false;
+    let pollingTimer = null;
+    let localStatus = "";
+    let cachedAnswers = {};
+
+    // 1. Room / Join Logic
+    function createRandomRoom() {
+      const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+      document.getElementById('roomIdInput').value = randomCode;
+    }
+
+    function joinGame() {
+      const name = document.getElementById('playerNameInput').value.trim();
+      const room = document.getElementById('roomIdInput').value.trim();
+
+      if (!name || !room) {
+        alert("請輸入名稱與房間代碼！");
+        return;
+      }
+
+      currentPlayer = name;
+      currentRoom = room;
+
+      document.getElementById('currentRoomDisplay').innerText = currentRoom;
+      document.getElementById('currentPlayerDisplay').innerText = currentPlayer;
+
+      document.getElementById('loginView').classList.add('hidden');
+      document.getElementById('gameView').classList.remove('hidden');
+
+      // Start Polling Loop
+      fetchRoomData();
+      pollingTimer = setInterval(fetchRoomData, 2500);
+    }
+
+    function leaveRoom() {
+      if (pollingTimer) clearInterval(pollingTimer);
+      document.getElementById('gameView').classList.add('hidden');
+      document.getElementById('loginView').classList.remove('hidden');
+      currentRoom = "";
+      currentPlayer = "";
+      isHost = false;
+      document.getElementById('hostPanel').classList.add('hidden');
+    }
+
+    // Toggle Hidden Host Console
+    function toggleHostPanel() {
+      isHost = !isHost;
+      const hostPanel = document.getElementById('hostPanel');
+      const statusText = document.getElementById('hostStatusText');
+
+      if (isHost) {
+        hostPanel.classList.remove('hidden');
+        statusText.innerText = "房主(開啟)";
+      } else {
+        hostPanel.classList.add('hidden');
+        statusText.innerText = "房主";
+      }
+    }
+
+    // 2. Polling API Sync (GET)[cite: 1, 2]
+    function fetchRoomData() {
+      if (!currentRoom) return;
+
+      fetch(`${GAS_API_URL}?room=${encodeURIComponent(currentRoom)}`)
+        .then(res => res.json())
+        .then(data => {
+          updateGameUI(data);
+        })
+        .catch(err => console.error("Polling Error:", err));
+    }
+
+    // 3. UI Renderer Engine
+    function updateGameUI(data) {
+      const { status, question, answers } = data;
+      localStatus = status || "setup";
+      cachedAnswers = answers || {};
+
+      const statusBadge = document.getElementById('gameStatusBadge');
+      const questionDisplay = document.getElementById('questionDisplay');
+
+      // Update Question text
+      if (question) {
+        questionDisplay.innerText = question;
+      } else {
+        questionDisplay.innerText = "等待房主出題中...";
+      }
+
+      // Status Badge Styling
+      if (localStatus === 'setup') {
+        statusBadge.innerText = "等待出題";
+        statusBadge.className = "px-3 py-1 text-xs rounded-full bg-tea/20 text-tea";
+      } else if (localStatus === 'playing') {
+        statusBadge.innerText = "思考解答中";
+        statusBadge.className = "px-3 py-1 text-xs rounded-full bg-bamboo/20 text-bamboo";
+      } else if (localStatus === 'revealed') {
+        statusBadge.innerText = "已掀牌";
+        statusBadge.className = "px-3 py-1 text-xs rounded-full bg-clay/20 text-clay font-bold";
+      }
+
+      // Render Cards Grid
+      renderCards(cachedAnswers, localStatus === 'revealed');
+    }
+
+    // 4. Card Render Logic with 3D Flip Animation
+    function renderCards(answers, isRevealed) {
+      const grid = document.getElementById('cardsGrid');
+      const playerNames = Object.keys(answers);
+
+      if (playerNames.length === 0) {
+        grid.innerHTML = `<p class="col-span-full text-center text-sm text-tea/60 py-4">尚無玩家作答...</p>`;
+        return;
+      }
+
+      grid.innerHTML = "";
+
+      playerNames.forEach(name => {
+        const answerVal = answers[name];
+        
+        // Card HTML Container (3D Flip Structure)
+        const cardElem = document.createElement('div');
+        cardElem.className = "perspective-1000 h-28 w-full";
+        
+        cardElem.innerHTML = `
+          <div class="card-inner relative w-full h-full transform-style-3d shadow-md rounded-xl ${isRevealed ? 'rotate-y-180' : ''}">
+            <!-- Front Face (Hidden Card) -->
+            <div class="absolute inset-0 backface-hidden bg-tea text-rice rounded-xl p-3 flex flex-col justify-between border-2 border-amberLight">
+              <span class="text-xs opacity-80">${escapeHtml(name)}</span>
+              <div class="text-center font-bold text-lg tracking-widest">🎴 心電卡</div>
+              <span class="text-[10px] text-right opacity-60">已提交</span>
+            </div>
+
+            <!-- Back Face (Revealed Answer) -->
+            <div class="absolute inset-0 backface-hidden rotate-y-180 bg-rice text-ink rounded-xl p-3 flex flex-col justify-between border-2 border-bamboo">
+              <span class="text-xs text-tea font-bold">${escapeHtml(name)}</span>
+              <div class="text-center font-bold text-lg text-bamboo truncate px-1">${escapeHtml(answerVal)}</div>
+              <span class="text-[10px] text-right text-tea/60">默契揭曉</span>
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(cardElem);
+      });
+    }
+
+    // 5. Actions / Host API Controls (POST)[cite: 1, 2]
+    function postAction(payload) {
+      payload.room = currentRoom;
+      return fetch(GAS_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(res => {
+        fetchRoomData(); // Force Sync immediately after action
+        return res;
+      })
+      .catch(err => console.error("Post Action Error:", err));
+    }
+
+    function submitAnswer() {
+      const ansInput = document.getElementById('playerAnswerInput');
+      const val = ansInput.value.trim();
+      if (!val) {
+        alert("請先輸入答案！");
+        return;
+      }
+
+      postAction({
+        action: "submit_answer",
+        playerName: currentPlayer,
+        answer: val
+      }).then(() => {
+        const statusText = document.getElementById('submitStatusText');
+        statusText.classList.remove('hidden');
+        setTimeout(() => statusText.classList.add('hidden'), 3000);
+      });
+    }
+
+    function hostSetQuestion() {
+      const qInput = document.getElementById('hostQuestionInput');
+      const question = qInput.value.trim();
+      if (!question) {
+        alert("請輸入題目！");
+        return;
+      }
+
+      postAction({
+        action: "set_question",
+        question: question
+      }).then(() => {
+        qInput.value = "";
+      });
+    }
+
+    function hostRevealCards() {
+      postAction({
+        action: "reveal"
+      });
+    }
+
+    function hostResetGame() {
+      if (confirm("確定要重置該房間狀態與答案嗎？")) {
+        postAction({
+          action: "reset"
+        });
+      }
+    }
+
+    // Helper: Anti-XSS Text Escaping
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>
